@@ -1,0 +1,6 @@
+{
+    "count": 100000,
+    "method": "get",
+	"url": "http://192.168.1.73:9096/api/log",
+    "data": ""
+}

@@ -1,0 +1,24 @@
+{
+    "files.autoSave": "onFocusChange",
+    "editor.fontSize": 20,
+    "go.buildOnSave": "off",
+    "go.lintOnSave": "off",
+    "go.vetOnSave": "off",
+    "go.gocodeAutoBuild": true,
+    "go.buildFlags": [],
+    "go.vetFlags": [],
+    "go.lintTool": "golint",
+    "go.formatTool": "goreturns",
+    "go.goroot": "H:\\software\\go",
+    "go.gopath": "H:\\gowork",
+
+    "go.autocompleteUnimportedPackages": true,
+    "go.gotoSymbol.includeImports": true,
+    "go.gocodePackageLookupMode": "go",
+    "go.inferGopath": false,
+    "go.useCodeSnippetsOnFunctionSuggestWithoutType": true,
+    "go.liveErrors": {
+        "enabled": true,
+        "delay": 100
+    }
+}
