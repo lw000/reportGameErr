@@ -12,12 +12,12 @@ import (
 
 func initCommonServer() {
 	var err error
-	err = global.IpServer.LoadData("./data/ip2region.db")
+	err = global.IpServer.LoadData("data/ip2region.db")
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = global.SourceMapServer.Parse("./source_map/project.js.map")
+	err = global.SourceMapServer.Parse("source_map/project.js.map")
 	if err != nil {
 		log.Panic(err)
 	}

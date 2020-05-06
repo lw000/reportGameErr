@@ -18,5 +18,4 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/tebeka/strftime v0.1.4 // indirect
 	github.com/weekface/mgorus v0.0.0-20181029072001-239539fe10e4
-	github.com/willf/bitset v1.1.10
 )

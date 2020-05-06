@@ -27,60 +27,60 @@ type LogRecordConfig struct {
 	info   string
 }
 
-func (lrc *LogRecordConfig) SetColumn(column string) {
-	lrc.column = column
+func (cfg *LogRecordConfig) SetColumn(column string) {
+	cfg.column = column
 }
 
-func (lrc *LogRecordConfig) SetInfo(info string) {
-	lrc.info = info
+func (cfg *LogRecordConfig) SetInfo(info string) {
+	cfg.info = info
 }
 
-func (lrc *LogRecordConfig) SetModule(module string) {
-	lrc.module = module
+func (cfg *LogRecordConfig) SetModule(module string) {
+	cfg.module = module
 }
 
-func (lrc *LogRecordConfig) SetLine(line string) {
-	lrc.line = line
+func (cfg *LogRecordConfig) SetLine(line string) {
+	cfg.line = line
 }
 
 func NewLogConfig() *LogRecordConfig {
 	return &LogRecordConfig{}
 }
 
-func (lrc *LogRecordConfig) Save(cip string) error {
+func (cfg *LogRecordConfig) Save(clientIP string) error {
 	var (
 		err error
 		row int
 		col int
 	)
 
-	row, err = strconv.Atoi(lrc.line)
+	row, err = strconv.Atoi(cfg.line)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	col, err = strconv.Atoi(lrc.column)
+	col, err = strconv.Atoi(cfg.column)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	go lrc.writeLog(row, col)
+	go cfg.writeLog(row, col)
 
 	return nil
 }
 
-func (lrc *LogRecordConfig) writeLog(row, col int) {
+func (cfg *LogRecordConfig) writeLog(row, col int) {
 	defer func() {
-		if err := recover(); err != nil {
-			log.Error(err)
+		if x := recover(); x != nil {
+			log.Error(x)
 		}
 	}()
 
 	source, name, line, column, ok := global.SourceMapServer.Get(row, col)
 	if ok {
-		p := &ErrorItem{Source: source, Name: name, Line: line, Column: column, ErrMsg: lrc.info}
+		p := &ErrorItem{Source: source, Name: name, Line: line, Column: column, ErrMsg: cfg.info}
 		log.Error(p)
 	} else {
 		log.WithFields(log.Fields{"row": row, "col": col}).Error("unknown error")
