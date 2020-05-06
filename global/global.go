@@ -1,16 +1,16 @@
 package global
 
 import (
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/lw000/gocommon/ip2region"
+	"github.com/pkg/errors"
+	"github.com/rifflock/lfshook"
+	log "github.com/sirupsen/logrus"
+	"github.com/weekface/mgorus"
 	"path"
 	"reportGameErr/config"
 	SourceMap "reportGameErr/sourcemap"
 	"time"
-
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/pkg/errors"
-	"github.com/rifflock/lfshook"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -30,7 +30,7 @@ func init() {
 // config logrus log to local filesystem, with file rotation
 func configLocalFilesystemLogger(logPath string, logFileName string, maxAge time.Duration, rotationTime time.Duration) {
 	baseLogPath := path.Join(logPath, logFileName)
-	writer, er := rotatelogs.New(
+	writer, err := rotatelogs.New(
 		baseLogPath+".%Y%m%d_%H%M",
 		// rotatelogs.WithLinkName(baseLogPath), // 生成软链，指向最新日志文件
 		rotatelogs.WithMaxAge(maxAge), // 文件最大保存时间
@@ -38,8 +38,8 @@ func configLocalFilesystemLogger(logPath string, logFileName string, maxAge time
 		rotatelogs.WithRotationTime(rotationTime), // 日志切割时间间隔
 	)
 
-	if er != nil {
-		log.Errorf("config local file system logger error. %+v", errors.WithStack(er))
+	if err != nil {
+		log.Errorf("config local file system logger error. %+v", errors.WithStack(err))
 	}
 
 	lfHook := lfshook.NewHook(lfshook.WriterMap{
@@ -49,38 +49,51 @@ func configLocalFilesystemLogger(logPath string, logFileName string, maxAge time
 		log.ErrorLevel: writer,
 		log.FatalLevel: writer,
 		log.PanicLevel: writer,
-	}, &log.TextFormatter{TimestampFormat: "2006-01-02 15:04:05"})
+	}, &log.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
 
 	// 打印函数，和函数所在行号
 	// log.SetReportCaller(true)
 
 	log.AddHook(lfHook)
+
+	// 配置mongodb
+	//mgoHooker, err := mgorus.NewHooker("root:root@192.168.110.110:27017", "h5_error_log", "collection")
+	//if err == nil {
+	//	log.AddHook(mgoHooker)
+	//} else {
+	//	log.Error(err)
+	//}
+
+	mgoHooker, err := mgorus.NewHookerWithAuth("192.168.110.110:27017", "h5_error_log", "collection", "root", "root")
+	if err == nil {
+		log.AddHook(mgoHooker)
+	} else {
+		log.Error(err)
+	}
 }
 
 // LoadGlobalConfig 加载全局配置
 func LoadGlobalConfig() error {
-	configLocalFilesystemLogger("log", "terror_server", time.Hour*24*365, time.Hour*24)
-
-	var er error
-	ProjectConfig, er = config.LoadIniConfig("./conf/conf.ini")
-	if er != nil {
-		log.Error(er)
-		return er
+	var err error
+	ProjectConfig, err = config.LoadIniConfig("conf/conf.ini")
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 
 	// 日志分割 1按天分割，2按周分割, 3 按月分割，4按年分割
-	var logname = "terror_server"
+	var logName = "h5_error"
 	switch ProjectConfig.SplitLog {
 	case 1:
-		configLocalFilesystemLogger("log", logname, time.Hour*24*365, time.Hour*24)
+		configLocalFilesystemLogger("log", logName, time.Hour*24*365, time.Hour*24)
 	case 2:
-		configLocalFilesystemLogger("log", logname, time.Hour*24*365, time.Hour*24*7)
+		configLocalFilesystemLogger("log", logName, time.Hour*24*365, time.Hour*24*7)
 	case 3:
-		configLocalFilesystemLogger("log", logname, time.Hour*24*365, time.Hour*24*30)
+		configLocalFilesystemLogger("log", logName, time.Hour*24*365, time.Hour*24*30)
 	case 4:
-		configLocalFilesystemLogger("log", logname, time.Hour*24*365, time.Hour*24*365)
+		configLocalFilesystemLogger("log", logName, time.Hour*24*365, time.Hour*24*365)
 	default:
-		configLocalFilesystemLogger("log", logname, time.Hour*24*365, time.Hour*24)
+		configLocalFilesystemLogger("log", logName, time.Hour*24*365, time.Hour*24)
 	}
 
 	return nil

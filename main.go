@@ -2,13 +2,12 @@
 package main
 
 import (
+	_ "github.com/icattlecoder/godaemon"
 	"github.com/lw000/gocommon/app/gin"
 	"github.com/lw000/gocommon/web/gin/middleware"
+	log "github.com/sirupsen/logrus"
 	"reportGameErr/global"
 	"reportGameErr/routers"
-
-	_ "github.com/icattlecoder/godaemon"
-	log "github.com/sirupsen/logrus"
 )
 
 func initCommonServer() {
@@ -45,7 +44,7 @@ func main() {
 	err := app.Run(global.ProjectConfig.Port, func(a *tygin.WebApplication) {
 		a.Engine().Use(tymiddleware.CorsHandler(nil))
 
-		routers.RegiserService(a.Engine())
+		routers.RegisterService(a.Engine())
 	})
 	log.Panic(err)
 }
